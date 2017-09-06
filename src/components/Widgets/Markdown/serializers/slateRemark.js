@@ -63,9 +63,9 @@ function processCodeMark(markTypes) {
  * the next mark type in `markTypes`. This continues for each member of
  * `markTypes`. If `markTypes` is empty, the original text node is returned.
  */
-function wrapTextWithMarks(textNode, markTypes) {
-  const wrapTextWithMark = (childNode, markType) => u(markType, [childNode]);
-  return markTypes.reduce(wrapTextWithMark, textNode);
+function wrapNodeWithMarks(textNode, markTypes) {
+  const wrapNodeWithMark = (childNode, markType) => u(markType, [childNode]);
+  return markTypes.reduce(wrapNodeWithMark, textNode);
 }
 
 /**
@@ -163,7 +163,7 @@ function convertTextNode(node) {
      * Recursively wrap the base text node in the individual mark nodes, if
      * any exist.
      */
-    return wrapTextWithMarks(textNode, filteredMarkTypes);
+    return wrapNodeWithMarks(textNode, filteredMarkTypes);
   });
 
   /**
@@ -289,8 +289,10 @@ function convertNode(node, children, shortcodePlugins) {
      * the node for both Slate and Remark schemas.
      */
     case 'link': {
-      const { url, title } = get(node, 'data', {});
-      return u(typeMap[node.type], { url, title }, children);
+      const { url, title, marks } = get(node, 'data', {});
+      const link = u(typeMap[node.type], { url, title }, children);
+      const result = !marks ? link : wrapNodeWithMarks(link, marks.map(mark => markMap[mark.type]));
+      return result;
     }
 
     /**
