@@ -1,4 +1,4 @@
-import { get, isEmpty, isArray, flatMap, last, concat } from 'lodash';
+import { get, isEmpty, isArray } from 'lodash';
 import u from 'unist-builder';
 
 /**
@@ -58,22 +58,9 @@ function createInline(type, nodes, props = {}) {
 function createText(value, data) {
   const node = { kind: 'text', data };
   if (isArray(value)) {
-    const ranges = value.reduce((acc, val) => {
-      if (val.type === 'text' && acc.length > 0 && last(acc).kind !== 'text') {
-        return concat(acc, { ...node, ranges: [val] });
-      }
-      if (val.type === 'text' && acc.length > 0) {
-        last(acc).ranges.push(val);
-        return acc;
-      }
-      if (val.type === 'text') {
-        return [{ ...node, ranges: [val]}];
-      }
-      return concat(acc, val);
-    }, []);
-    return { ...node, ranges };
+    return { ...node, ranges: value };
   }
-  return { ...node, text: value };
+  return {...node, text: value };
 }
 
 function convertMarkNode(node, parentMarks = []) {
@@ -99,14 +86,6 @@ function convertMarkNode(node, parentMarks = []) {
      */
     if (['html', 'text'].includes(childNode.type)) {
       ranges.push({ text: childNode.value, marks });
-      return;
-    }
-
-    if (childNode.type === 'link') {
-      const newData = { ...(childNode.data || {}), marks };
-      const newNode = { ...childNode, data: newData };
-      const result = transform(newNode);
-      ranges.push(result);
       return;
     }
 
@@ -279,9 +258,9 @@ function convertNode(node, nodes) {
      * schema references them in the data object.
      */
     case 'link': {
-      const { title, url, data } = node;
-      const newData = { ...data, title, url };
-      return createInline(typeMap[type], nodes, { data: newData });
+      const { title, url } = node;
+      const data = { title, url };
+      return createInline(typeMap[type], nodes, { data });
     }
 
     /**
@@ -298,27 +277,27 @@ function convertNode(node, nodes) {
 }
 
 
-function transform(node) {
-  /**
-   * Call `transform` recursively on child nodes.
-   *
-   * If a node returns a falsey value, filter it out. Some nodes do not
-   * translate from MDAST to Slate, such as definitions for link/image
-   * references or footnotes.
-   */
-  const children = !isEmpty(node.children) && flatMap(node.children, transform).filter(val => val);
-
-  /**
-   * Run individual nodes through the conversion factory.
-   */
-  const result = convertNode(node, children);
-  return result;
-}
-
 /**
  * A Remark plugin for converting an MDAST to Slate Raw AST. Remark plugins
  * return a `transform` function that receives the MDAST as it's first argument.
  */
 export default function remarkToSlate() {
+  function transform(node) {
+
+    /**
+     * Call `transform` recursively on child nodes.
+     *
+     * If a node returns a falsey value, filter it out. Some nodes do not
+     * translate from MDAST to Slate, such as definitions for link/image
+     * references or footnotes.
+     */
+    const children = !isEmpty(node.children) && node.children.map(transform).filter(val => val);
+
+    /**
+     * Run individual nodes through the conversion factory.
+     */
+    return convertNode(node, children);
+  }
+
   return transform;
 }
