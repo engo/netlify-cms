@@ -33,4 +33,8 @@ describe('slate', () => {
   it('should parse inline images as images', () => {
     expect(process('a ![b](c)')).toEqual('a ![b](c)\n');
   });
+
+  it('should not escape markdown entities in html', () => {
+    expect(process('<span>*</span>')).toEqual('<span>*</span>\n');
+  });
 });
