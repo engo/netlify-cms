@@ -11,9 +11,9 @@ After clicking that button, you’ll authenticate with GitHub and choose a repos
 1. From the Netlify site dashboard, select the **Identity** tab, and you'll find that there are no users yet. By default, this site is set to accept users by invitation only, and even the site owner needs to be invited.
 2. Select **Invite users**, enter your email address, and select Send.
 3. Check your email for the invitation. It will be sent from `no-reply@netlify.com`.
-![Sample email subject line: You've been invited to join radiologist-amanda-53841.netlify.com](/img/email-subject.png?raw=true)
+![Sample email subject line: You've been invited to join radiologist-amanda-53841.netlify.com](/img/email-subject.PNG?raw=true)
 4. Click the link to accept the invite, and you’ll be directed to your new site, with a prompt to create a password.
-!["Complete your signup" modal on the Kaldi coffee site](/img/create-password.png?raw=true)
+!["Complete your signup" modal on the Kaldi coffee site](/img/create-password.PNG?raw=true)
 5. Enter a password, sign in, and you’ll be directed straight to the CMS!
 
 Try adding and editing posts, or changing the content of the Products page. When you save, the changes will be pushed immediately to GitHub, triggering a build on Netlify, and updating the content on your site.
