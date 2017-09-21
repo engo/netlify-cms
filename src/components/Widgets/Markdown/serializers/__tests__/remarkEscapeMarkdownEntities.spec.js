@@ -19,22 +19,30 @@ describe('remarkEscapeMarkdownEntities', () => {
     expect(process('_a_')).toEqual('\\_a\\_');
     expect(process('__a__')).toEqual('\\_\\_a\\_\\_');
     expect(process('~~a~~')).toEqual('\\~\\~a\\~\\~');
+    expect(process('[]')).toEqual('\\[]');
+    expect(process('[]()')).toEqual('\\[]()');
+    expect(process('[a](b)')).toEqual('\\[a](b)');
+    expect(process('[Test sentence.](https://www.example.com)'))
+      .toEqual('\\[Test sentence.](https://www.example.com)');
+    expect(process('![a](b)')).toEqual('!\\[a](b)');
   });
 
-  it('should not escape inactive markdown entities', () => {
+  it('should not escape inactive, single markdown entities', () => {
     expect(process('a*b')).toEqual('a*b');
-    expect(process('a ** b')).toEqual('a ** b');
     expect(process('_')).toEqual('_');
-    expect(process('a __ b')).toEqual('a __ b');
     expect(process('~')).toEqual('~');
-    expect(process('~~')).toEqual('~~');
-    expect(process('a ~~ b')).toEqual('a ~~ b');
+    expect(process('[')).toEqual('[');
   });
 
   it('should escape leading markdown entities', () => {
     expect(process('#')).toEqual('\\#');
     expect(process('-')).toEqual('\\-');
     expect(process('*')).toEqual('\\*');
+    expect(process('>')).toEqual('\\>');
+    expect(process('=')).toEqual('\\=');
+    expect(process('|')).toEqual('\\|');
+    expect(process('```')).toEqual('\\`\\``');
+    expect(process('    ')).toEqual('\\    ');
   });
 
   it('should escape leading markdown entities preceded by whitespace', () => {
@@ -45,6 +53,10 @@ describe('remarkEscapeMarkdownEntities', () => {
   it('should not escape leading markdown entities preceded by non-whitespace characters', () => {
     expect(process('a# # b #')).toEqual('a# # b #');
     expect(process('a- - b -')).toEqual('a- - b -');
+  });
+
+  it('should not escape html tags', () => {
+    expect(process('<a attr="**a**">')).toEqual('<a attr="**a**">');
   });
 
   it('should not escape the contents of preformatted html blocks', () => {
